@@ -1,7 +1,14 @@
-This program is used to receive data via a serial port (.net-components) and to do something with it defined in an ini file
+This program is used to receive data via a serial port and to do something with it defined in an ini file
 
-With default code the received input is used to be opened via a hidden cmd in the webbrowser.
+The idea was that a Barcode or QR-Code Scanner scans URLs. The program listens on that port and opens the default webbrowser with received data.
+
+The command and the serial port can be configured in an ini-file.
+
+Program starts minimized in systray and logs received data in textbox in gui.
 
 Codes is probably not that great but it's working. Have fun with it.
 
-Program starts hidden in systray and logs received data in textbox in gui.
+Possible Usecases:
+1. Opening a Covid Test Certificate in the browser.
+2. Handing over received data on a serial port to any desired program as start parameter.
+3. Be creative. Do whatever you please.
