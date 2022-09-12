@@ -105,7 +105,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="PDRForms_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -120,9 +119,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="2139177-200 %281%29.ico" />
     <Content Include="favicon %281%29.ico" />
-    <Content Include="Icon.ico" />
     <Content Include="kekW.ico" />
     <None Include="Resources\Icon.jpg" />
   </ItemGroup>

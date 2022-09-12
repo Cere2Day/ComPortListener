@@ -34,7 +34,7 @@ namespace PDRForms
         {
             if (!allowVisible)
             {
-                value = false;
+                value = true;
                 if (!this.IsHandleCreated) CreateHandle();
             }
             base.SetVisibleCore(value);
@@ -135,14 +135,7 @@ namespace PDRForms
             Environment.Exit(1);
         }
 
-        private void Form1_Resize(object sender, EventArgs e)                                       //when minimized close to systray
-        {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                Hide();
-                notifyIcon1.Visible = true;
-            }
-        }
+
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {

@@ -117,37 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="notifyIcon1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>126, 17</value>
-  </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="notifyIcon1.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA
-        AAD//////////////////////////////////////v7+//7+/v//////////////////////////////
-        /////////////////////////////////////////v7+/5SUlP+UlJT//v7+////////////////////
-        //////////////////////////////////////////////7+/v9XV1f/V1dX//7+/v//////////////
-        ///////////////////////////////////////////////////+/v7/V1dX/1dXV//+/v7/////////
-        /////////////////////////////////////////////////////////v7+/1dXV/9XV1f//v7+////
-        //////////////////////////////////////////////////////////////7+/v9wcHD/cHBw//7+
-        /v/////////////////////////////////////////////////ExMT/xMTE/8XFxf+kpKT/kpKS/5KS
-        kv+kpKT/xcXF/8TExP/ExMT////////////////////////////+/v7/V1dX/1dXV/9bW1v/AAAA/wMD
-        A/8DAwP/AAAA/1tbW/9XV1f/V1dX//7+/v///////////////////////v7+/1ZWVv9WVlb/Wlpa/wAA
-        AP8AAAD/AAAA/wAAAP9aWlr/VlZW/1ZWVv/+/v7///////////////////////7+/v9vb2//b29v/1pa
-        Wv8AAAD/AAAA/wAAAP8AAAD/Wlpa/29vb/9vb2///v7+///////////////////////+/v7/sbGx/46O
-        jv86Ojr/AAAA/wAAAP8AAAD/AAAA/zo6Ov+Ojo7/sbGx//7+/v///////////////////////v7+/1tb
-        W/8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/1tbW//+/v7///////////////////////7+
-        /v+Xl5f/ODg4/wEBAf8AAAD/AAAA/wAAAP8AAAD/AQEB/zg4OP+Xl5f//v7+////////////////////
-        /////////////7CwsP8hISH/Hx8f/x8fH/8fHx//Hx8f/yEhIf+wsLD/////////////////////////
-        ///////////////////09PT/4eHh/+Hh4f/h4eH/4eHh/+Hh4f/h4eH/9PT0////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAA==
-</value>
-  </data>
   <metadata name="serialPort1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA
