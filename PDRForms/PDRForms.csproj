@@ -90,8 +90,17 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="COM_PORT_ERROR.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="COM_PORT_ERROR.Designer.cs">
+      <DependentUpon>COM_PORT_ERROR.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="COM_PORT_ERROR.resx">
+      <DependentUpon>COM_PORT_ERROR.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
