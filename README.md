@@ -4,7 +4,9 @@ The idea was that a Barcode or QR-Code Scanner scans URLs. The program listens o
 
 The command and the serial port can be configured in an ini-file.
 
-Program starts minimized in systray and logs received data in textbox in gui.
+Program starts minimized in systray and logs received data in textbox in gui.+
+
+Uses .net 4.8. Compatibility begins with version 3.5 SP1
 
 Codes is probably not that great but it's working. Have fun with it.
 
