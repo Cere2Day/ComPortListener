@@ -4,43 +4,41 @@ using System.IO.Ports;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Drawing;
+using System.Linq;
 using PDR;
+using System.Collections.Generic;
 
 namespace PDRForms
 {
-
-
     public partial class Form1 : Form
     {
-        public static int port;                                                             // Variable from Ini for Com-Port Number
-        public static int baud;                                                             // Variable from Ini for Baud
-        public static int databit;                                                          // Variable from Ini for Databit
-        public static int filename;                                                         // Variable from Ini for ininame
-        public static int arguments;                                                        // Variable from Ini for params
-        private bool allowVisible;                                                          // Bool-Variable for double click
+        private static List<string> receivedDataList = new List<string>(); // Liste, um die letzten 20 Werte zu speichern
+        private const int MaxLines = 20; // Maximale Anzahl der Zeilen vor dem Leeren
+
         
+        public static int port;
+        public static int baud;
+        public static int databit;
+        public static int filename;
+        public static int arguments;
+        private bool allowVisible;
 
-        public static string fileName = Path.Combine(Environment.CurrentDirectory, "Serial.ini");       //Read ini-file
+        public static string fileName = Path.Combine(Environment.CurrentDirectory, "Serial.ini");
+        public static string[] lines = File.ReadAllLines(fileName);
 
-        public static string[] lines = File.ReadAllLines(fileName);                                     //Put ini-input in array
-
-        public static String subport = "";                                                  //Substitute-String for Port
-        public static String subBaud = "";                                                  //Substitute-String for Baud
-        public static String subDataBit = "";                                               //Substitute-String for Databit
-        public static String subFilename = "";                                              //Substitute-String for Filename
-        public static String subArguments = "";                                             //Substitute-String for Arguments
-        public string newLine = Environment.NewLine;
+        public static string subport = "";
+        public static string subBaud = "";
+        public static string subDataBit = "";
+        public static string subFilename = "";
+        public static string subArguments = "";
+        private static string logFilePath = Path.Combine(Environment.CurrentDirectory, "PDR.log");
 
         private NotifyIcon systemTrayIcon;
         private readonly Timer timer;
 
         private ContextMenuStrip contextMenuStrip;
 
-
-
-
-        protected override void SetVisibleCore(bool value)                                  //Show app
+        protected override void SetVisibleCore(bool value)
         {
             if (!allowVisible)
             {
@@ -49,37 +47,94 @@ namespace PDRForms
             }
             base.SetVisibleCore(value);
         }
-        private static void Callmyfunction(string data, string filename, string arguments)      //Function with hidden cmd and arguments from ini file
+
+        private async Task CallmyfunctionAsync(string data, string filename, string arguments)
         {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo
+            try
             {
-                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
-                FileName = filename,
-                Arguments = arguments + " " + data
-            };
-            process.StartInfo = startInfo;
-            process.Start();
+                // Überprüfe, ob die PortalDL.exe läuft
+                Process[] processes = Process.GetProcessesByName("PortalDL");
+                foreach (Process p in processes)
+                {
+                    p.Kill();
+                }
+
+                string fileNameOnly = Path.GetFileName(filename);
+
+                if (!fileNameOnly.Equals("PortalDL.exe", StringComparison.OrdinalIgnoreCase))
+                {
+                    arguments = arguments + " " + data;
+                }
+                else
+                {
+                    arguments = arguments + data;
+                }
+
+                // Kombiniere filename und arguments in einer einzigen Nachricht
+                string logMessage = $"{filename} {arguments}";
+                Logger.LogToFile($"Attempting to start process with {logMessage}"); // Vor dem Start protokollieren
+
+                Process process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    FileName = filename,
+                    Arguments = arguments,
+                    UseShellExecute = false
+                };
+                process.StartInfo = startInfo;
+                process.Start();
+
+                Logger.LogToFile($"Process started successfully with {logMessage}"); // Nach dem Start protokollieren
+            }
+            catch (UnauthorizedAccessException uae)
+            {
+                Logger.LogToFile($"UnauthorizedAccessException: {uae.Message} Filename: {filename} Arguments: {arguments}"); // Detaillierte Fehlermeldung protokollieren
+            }
+            catch (FileNotFoundException fnfe)
+            {
+                Logger.LogToFile($"FileNotFoundException: {fnfe.Message} Filename: {filename} Arguments: {arguments}"); // Detaillierte Fehlermeldung protokollieren
+            }
+            catch (Exception ex)
+            {
+                Logger.LogToFile($"General Exception: {ex.Message} Filename: {filename} Arguments: {arguments}"); // Allgemeine Fehlermeldung protokollieren
+            }
         }
 
-        public Form1()                                                                           
+        private static void LogToFile(string message)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(logFilePath, true))
+                {
+                    sw.WriteLine($"{DateTime.Now}: {message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing to log file: " + ex.Message);
+            }
+        }
+
+        public Form1()
         {
             InitializeComponent();
             InitializeSystemTray();
+            //InitializeRichTextBox(); // Initialisiert die RichTextBox
             timer = new Timer
             {
                 Interval = 5000
             };
             timer.Tick += Timer_Tick;
             timer.Start();
-            
+            this.UseWaitCursor = false;
         }
 
         private void InitializeSystemTray()
         {
             systemTrayIcon = new NotifyIcon
             {
-                Icon = this.Icon, // Setze das Icon des NotifyIcon-Steuerelements auf das Icon deiner Windows Forms App.
+                Icon = this.Icon,
                 Visible = true,
                 Text = "PortDataReceiver"
             };
@@ -101,12 +156,20 @@ namespace PDRForms
 
             systemTrayIcon.ContextMenuStrip = contextMenuStrip;
 
-            this.Hide(); // Verstecke das Hauptformular.
+            this.Hide();
+        }
+
+        private void InitializeRichTextBox()
+        {
+            richTextBox1 = new RichTextBox
+            {
+                Dock = DockStyle.Fill
+            };
+            this.Controls.Add(richTextBox1);
         }
 
         private void OnSystemTrayIconDoubleClick(object sender, MouseEventArgs e)
         {
-            // Zeige das Hauptformular wieder an, wenn das System Tray Icon doppelt angeklickt wird.
             if (e.Button == MouseButtons.Left)
             {
                 this.Show();
@@ -115,15 +178,14 @@ namespace PDRForms
             }
         }
 
-
-
-
-
-
         private void Form1_Load(object sender, EventArgs e)
         {
-            for (int i = 0; i < lines.Length; i++)                                  //for-Schleife to put ini-content in substitude variables
-            {                                                                       //with contains
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].StartsWith("#"))
+                {
+                    continue;
+                }
                 if (lines[i].Contains("PORT="))
                 {
                     port = i;
@@ -145,14 +207,11 @@ namespace PDRForms
                     arguments = i;
                 }
             }
-            subport = lines[port].Substring(lines[port].IndexOf('=') + 1);                      //fill the stubstitude strings with the right positions
+            subport = lines[port].Substring(lines[port].IndexOf('=') + 1);
             subBaud = lines[baud].Substring(lines[baud].IndexOf('=') + 1);
             subDataBit = lines[databit].Substring(lines[databit].IndexOf('=') + 1);
             subFilename = lines[filename].Substring(lines[filename].IndexOf('=') + 1);
             subArguments = lines[arguments].Substring(lines[arguments].IndexOf('=') + 1);
-
-
-
 
             SerialPort mySerialPort = new SerialPort(subport)
             {
@@ -162,67 +221,99 @@ namespace PDRForms
                 DataBits = int.Parse(subDataBit),
                 Handshake = Handshake.None,
                 RtsEnable = true
-            };                                  //create com port via .net
+            };
 
-
-
-
-
-
-
-            mySerialPort.DataReceived += new SerialDataReceivedEventHandler(SerialPort1_DataReceived);      //event
+            mySerialPort.DataReceived += new SerialDataReceivedEventHandler(SerialPort1_DataReceived);
 
             try
             {
-                mySerialPort.Open();                                                                            //open 
-            }catch (Exception)
+                mySerialPort.Open();
+            }
+            catch (Exception)
             {
                 COM_PORT_ERROR com_err = new COM_PORT_ERROR();
                 com_err.ShowDialog();
             }
-            label1.Text = "Listening on " + subport + ":";                                                  //show com port on label
-            textBox2.Text = "Config located in: " + fileName;                                               //show in textbox where config is
-
-
+            label1.Text = "Listening on " + subport;
 
             Console.Read();
         }
 
-        private void SerialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)     //receive data event
+
+        private async void SerialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            SerialPort sp = (SerialPort)sender;                                                                                                                    
-            string indata = sp.ReadExisting();                                                                  //write data in string
-            
-            Callmyfunction(indata, subFilename, subArguments);                                                  //callmyfunction
-            this.Invoke((MethodInvoker)delegate                                                                 //write received data in textbox
+            await Task.Run(() =>
             {
-                textBox1.Text = textBox1.Text + indata +newLine;
-                
+                SerialPort sp = (SerialPort)sender;
+                string indata = sp.ReadExisting();
+
+                try
+                {
+                    // Verarbeite die Daten asynchron
+                    CallmyfunctionAsync(indata, subFilename, subArguments).Wait();
+
+                    // Aktualisiere die RichTextBox
+                    UpdateRichTextBox(indata);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogToFile("Error processing data: " + ex.Message);
+                }
             });
-        }        
-        private void NotifyIcon1_DoubleClick_1(object sender, EventArgs e)                        //double click systray
+        }
+
+        private void UpdateRichTextBox(string data)
+        {
+            if (receivedDataList.Count >= 20)
+            {
+                receivedDataList.RemoveAt(0);
+            }
+            receivedDataList.Add(data);
+
+            if (richTextBox1.InvokeRequired)
+            {
+                richTextBox1.BeginInvoke((MethodInvoker)delegate
+                {
+                    richTextBox1.Lines = receivedDataList.ToArray();
+                });
+            }
+            else
+            {
+                richTextBox1.Lines = receivedDataList.ToArray();
+            }
+        }
+
+        private void ProcessData(string data)
+        {
+            try
+            {
+                string cleanData = data.Trim();
+                if (Uri.IsWellFormedUriString(cleanData, UriKind.Absolute))
+                {
+                    // Verarbeite URL
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogToFile("Error in ProcessData: " + ex.Message);
+            }
+        }
+
+        private void NotifyIcon1_DoubleClick_1(object sender, EventArgs e)
         {
             allowVisible = true;
             Show();
-        }        
-        private void Button1_Click_1(object sender, EventArgs e)                                   //Close on exit button
+        }
+
+        private void Button1_Click_1(object sender, EventArgs e)
         {
             Environment.Exit(1);
         }
 
-
-
-        private void TextBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // Timer abgelaufen, minimieren Sie die Anwendung in den System-Tray
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
-            // Stoppen Sie den Timer, da er nicht mehr benötigt wird
             timer.Stop();
         }
 
@@ -230,7 +321,7 @@ namespace PDRForms
         {
             if (this.WindowState == FormWindowState.Minimized)
             {
-                this.ShowInTaskbar = false;// Aktion beim Minimieren des Fensters
+                this.ShowInTaskbar = false;
             }
         }
 
@@ -239,9 +330,11 @@ namespace PDRForms
             this.WindowState = FormWindowState.Normal;
             this.ShowInTaskbar = true;
         }
+
         private void Option1MenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start("notepad.exe", fileName);
+            // Nutze den Pfad aus der INI-Datei
+            Process.Start(subFilename, fileName);
         }
 
         private void Option2MenuItem_Click(object sender, EventArgs e)
@@ -251,9 +344,35 @@ namespace PDRForms
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Process.Start("notepad.exe", fileName);
+            try
+            {
+                // Öffne die INI-Datei in Notepad
+                Process.Start("notepad.exe", fileName);
+            }
+            catch (Exception ex)
+            {
+                // Fehlerbehandlung, falls etwas schiefgeht
+                MessageBox.Show("Fehler beim Öffnen der INI-Datei: " + ex.Message, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void TextBox1_TextChanged(object sender, EventArgs e)
+        {
+            // Event-Handler für TextChanged
+        }
+
+        private void button3_MouseClick(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                // Öffne die Log-Datei in Notepad
+                Process.Start("notepad.exe", logFilePath);
+            }
+            catch (Exception ex)
+            {
+                // Fehlerbehandlung, falls etwas schiefgeht
+                MessageBox.Show("Fehler beim Öffnen der Log-Datei: " + ex.Message, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
-
-
 }
